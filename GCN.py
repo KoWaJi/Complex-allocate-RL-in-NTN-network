@@ -22,7 +22,6 @@ class GCN(nn.Module):
         x = self.lin2(x)
         x = torch.relu(x)
         output = torch.matmul(edge_index, x)
-
         bs_embedding = torch.mul(1 / true_ue, output[0, :])
         user_embedding = output[1:, ]
         bs_embedding = bs_embedding.expand(true_ue, self.out_channels)

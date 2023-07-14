@@ -37,17 +37,19 @@ def evaluate_policy(args, env, agent, state_norm, evaluate_num):
 
 def create_x(s):
     s = list(s)
-    s.insert(int(len(s) / 2), 0)
-    s.insert(0, 0)  # 插入基站
-    true_ue = int(len(s) / 2)
-    hol = torch.tensor(s[:true_ue]).reshape(true_ue, 1)
-    n_rb = torch.tensor(s[true_ue:]).reshape(true_ue, 1)
-    x = torch.cat((hol, n_rb), dim=1)
+    true_ue = int(len(s) / 3)
+    insert_gNB = [0]
+    s = insert_gNB + s[:true_ue] + insert_gNB + s[true_ue : 2 * true_ue] + insert_gNB + s[2 * true_ue:]
+    true_ue += 1
+    snr = torch.tensor(s[:true_ue]).reshape(true_ue, 1)
+    hol = torch.tensor(s[true_ue : 2 * true_ue]).reshape(true_ue, 1)
+    packet = torch.tensor(s[2 * true_ue:]).reshape(true_ue, 1)
+    x = torch.cat((snr, hol, packet), dim=1)
     return x.float().to(torch.device('cuda:2'))
 
 
 def create_edge_index(s):
-    true_ue = int(len(s) / 2)
+    true_ue = int(len(s) / 3)
     d = [true_ue]
     for i in range(true_ue):
         d.append(1)
@@ -72,10 +74,10 @@ def main(args, env_name, config, number):
     #np.random.seed(seed)
     #torch.manual_seed(seed)
 
-    args.max_action = 2
-    args.max_episode_steps = 200  # Maximum number of steps per episode
+    #args.max_action = 2
+    args.max_episode_steps = 2000  # Maximum number of steps per episode
     print("env={}".format(env_name))
-    print("max_action={}".format(args.max_action))
+    #print("max_action={}".format(args.max_action))
     print("max_episode_steps={}".format(args.max_episode_steps))
 
     evaluate_num = 0  # Record the number of evaluations
@@ -114,7 +116,7 @@ def main(args, env_name, config, number):
         done = False
         while not done:
             episode_steps += 1
-            true_ue = len(s) / 2
+            true_ue = len(s) / 3
             x = create_x(s)
             edge_index = create_edge_index(s)
             a, a_logprob = agent.choose_action(x, edge_index)  # Action and the corresponding log probability
@@ -178,7 +180,7 @@ def main(args, env_name, config, number):
                 agent.update(replay_buffer, total_steps)
                 replay_buffer.returnzero()
     print('finish')
-    print('overload time', env.getoverload_time())
+    #print('overload time', env.getoverload_time())
     output_file_path = GLOBAL_LOGGER.get_log_path()
     agent.save(output_file_path, 'final', total_steps, old_total_average_reward)
     '''
@@ -205,8 +207,8 @@ if __name__ == '__main__':
     parser.add_argument("--batch_size", type=int, default=int(2048), help="Batch size")
     parser.add_argument("--mini_batch_size", type=int, default=64, help="Minibatch size")
     parser.add_argument("--hidden_width", type=int, default=64, help="The number of neurons in hidden layers of the neural network")
-    parser.add_argument("--embedding_width1", type=int, default=int(8), help=" The embedding width1 of GCN output")
-    parser.add_argument("--embedding_width2", type=int, default=int(16), help=" The embedding width2 of GCN output")
+    parser.add_argument("--embedding_width1", type=int, default=int(9), help=" The embedding width1 of GCN output")
+    parser.add_argument("--embedding_width2", type=int, default=int(18), help=" The embedding width2 of GCN output")
     parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate of agent")
     parser.add_argument("--gamma", type=float, default=0.9, help="Discount factor")
     parser.add_argument("--lamda", type=float, default=0.95, help="GAE parameter")
@@ -225,7 +227,7 @@ if __name__ == '__main__':
     parser.add_argument("--continue_train", type=float, default=False, help="justice continue train or not")
 
     log_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
-    folder_name = "old_CSI"
+    folder_name = "complex_allocate"
     experiment_name = "PPO-continuous"
     GLOBAL_LOGGER.set_log_path(log_path, folder_name, experiment_name)
     scalar_list = []

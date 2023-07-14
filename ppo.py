@@ -28,7 +28,7 @@ def init_weight(layer, initializer="he normal"):
     elif initializer == "he normal":
         nn.init.kaiming_normal_(layer.weight)
 
-
+'''
 class Actor_Beta(nn.Module):
     def __init__(self, args):
         super(Actor_Beta, self).__init__()
@@ -87,7 +87,7 @@ class Critic(nn.Module):
             nn.ReLU(),
             self.q_value,
         )
-
+'''
 '''
 class Agent(nn.Module):
     def __init__(self, args):
@@ -137,7 +137,7 @@ class Agent(nn.Module):
 class Agent(nn.Module):
     def __init__(self, args):
         super(Agent, self).__init__()
-        self.GCN1 = GCN(2, args.embedding_width1, args.embedding_width2)   #可扩展性  #这里最好将gcn输出维度这个超参数变量化放进args
+        self.GCN1 = GCN(3, args.embedding_width1, args.embedding_width2)   #可扩展性  #这里最好将gcn输出维度这个超参数变量化放进args
         self.fc1 = nn.Linear(2 * args.embedding_width2, args.hidden_width)
         self.fc2 = nn.Linear(args.hidden_width, args.hidden_width)
         self.fc3 = nn.Linear(args.hidden_width, 1)
@@ -210,7 +210,7 @@ class Agent(nn.Module):
 class PPO_continuous():
     def __init__(self, args):
         self.policy_dist = args.policy_dist
-        self.max_action = args.max_action
+        #self.max_action = args.max_action
         self.batch_size = args.batch_size
         self.mini_batch_size = args.mini_batch_size
         self.max_train_steps = args.max_train_steps
@@ -239,7 +239,7 @@ class PPO_continuous():
 
     def evaluate(self, x, edge_index):  # When evaluating the policy, we select the action with the highest probability
         a = self.agent.get_action(x, edge_index)
-        a = torch.clamp(a, -self.max_action, self.max_action)  # [-max,max]
+        #a = torch.clamp(a, -self.max_action, self.max_action)  # [-max,max]
         return a.detach().cpu().numpy().flatten()
 
 
@@ -247,7 +247,7 @@ class PPO_continuous():
         with torch.no_grad():
             dist = self.agent.get_dist(x, edge_index)
             a = dist.sample()  # Sample the action according to the probability distribution
-            a = torch.clamp(a, -self.max_action, self.max_action)  # [-max,max]
+            #a = torch.clamp(a, -self.max_action, self.max_action)  # [-max,max]
             #print('action', a)
             a_logprob = dist.log_prob(a)  # The log probability density of the action
         a = a.cpu()
@@ -281,16 +281,18 @@ class PPO_continuous():
 
     def create_x(self, s):
         s = list(s)
-        s.insert(int(len(s) / 2), 0)
-        s.insert(0, 0)  # 插入基站
-        true_ue = int(len(s) / 2)
-        hol = torch.tensor(s[:true_ue]).reshape(true_ue, 1)
-        n_rb = torch.tensor(s[true_ue:]).reshape(true_ue, 1)
-        x = torch.cat((hol, n_rb), dim=1)
+        true_ue = int(len(s) / 3)
+        insert_gNB = [0]
+        s = insert_gNB + s[:true_ue] + insert_gNB + s[true_ue: 2 * true_ue] + insert_gNB + s[2 * true_ue:]
+        true_ue += 1
+        snr = torch.tensor(s[:true_ue]).reshape(true_ue, 1)
+        hol = torch.tensor(s[true_ue: 2 * true_ue]).reshape(true_ue, 1)
+        packet = torch.tensor(s[2 * true_ue:]).reshape(true_ue, 1)
+        x = torch.cat((snr, hol, packet), dim=1)
         return x.float().to(self.device)
 
     def create_edge_index(self, s):
-        true_ue = int(len(s) / 2)
+        true_ue = int(len(s) / 3)
         d = [true_ue]
         for i in range(true_ue):
             d.append(1)

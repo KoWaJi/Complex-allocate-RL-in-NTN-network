@@ -37,6 +37,7 @@ class Channel:
             return snr
 
     def step(self, action):  #返回式17的奖励，并依概率变动用户位置
+        '''
         err = 0.
         if action.n_rb > 0:
             err = tx_error_rate_for_n_bytes(action.n_byte, action.n_rb, db_to_dec(self.get_snr_db()),
@@ -52,9 +53,9 @@ class Channel:
                 ret = - math.log10(err)  # overload的情况误码率不能满足要求，获得的reward是不到5的
         else:
             ret = 0.
-
+        '''
         #self.change_position()
-
+        ret = 1
         return ret
 
     def change_position(self):  #1e-4的概率变动位置，有0.2的概率改变信道状态

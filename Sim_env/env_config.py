@@ -7,9 +7,9 @@ from Sim_env.user_equipment import UE_CONFIG
 
 class env_config_helper():
     def __init__(self):
-        self.N_UE = 30
-        self.N_EPISODE = 200
-        self.N_STEP = 200
+        self.N_UE = 120
+        self.N_EPISODE = 500
+        self.N_STEP = 500
 
         self.ERROR_RATE = 1e-5  
         self.PACKET_SIZE = 32

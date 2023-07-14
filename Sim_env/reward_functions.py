@@ -2,17 +2,17 @@
 
 
 def hol_is_in_range(hol, d_min, d_max) -> bool:
-    if hol >= d_min and hol <= d_max:
-        return True
-    else:
+    if hol < d_min or hol > d_max:
         return False
+    else:
+        return True
 
 
 def hol_flat_reward(hol, d_min, d_max) -> float:
     if not hol_is_in_range(hol, d_min, d_max):
-        return 0.
+        return -1.
     else:
-        return 1.
+        return 0.
 
 
 if __name__ == '__main__':
