@@ -1,29 +1,23 @@
-# PPO-continuous
-This is a concise Pytorch implementation of PPO on continuous action space with 10 tricks.<br />
-
-## 10 tricks
-Trick 1—Advantage Normalization.<br />
-Trick 2—State Normalization.<br />
-Trick 3 & Trick 4—— Reward Normalization & Reward Scaling.<br />
-Trick 5—Policy Entropy.<br />
-Trick 6—Learning Rate Decay.<br />
-Trick 7—Gradient clip.<br />
-Trick 8—Orthogonal Initialization.<br />
-Trick 9—Adam Optimizer Epsilon Parameter.<br />
-Trick10—Tanh Activation Function.<br />
-
-## How to use my code?
-You can dircetly run 'PPO_continuous_main.py' in your own IDE.<br />
-
-## Trainning environments
-You can set the 'env_index' in the codes to change the environments. Here, we train our code in 4 environments.<br />
-env_index=0 represent 'BipedalWalker-v3'<br />
-env_index=1 represent 'HalfCheetah-v2'<br />
-env_index=2 represent 'Hopper-v2'<br />
-env_index=3 represent 'Walker2d-v2'<br />
-
-## Trainning result
-![image](https://github.com/Lizhi-sjtu/DRL-code-pytorch/blob/main/5.PPO-continuous/training_result.png)
-
-## Tutorial
-If you can read Chinese, you can get more information from this blog.https://zhuanlan.zhihu.com/p/512327050
+## version1.0改动如下：
+- 数据包的到达符合泊松分布而非伯努利二项分布
+- 基站只考虑活跃用户（*有数据包在的用户*）进行调度（*为了防止出现没有活跃用户的情况发生，将对没有活跃用户的时刻再对接入基站的用户进行一次push*）
+- episode改为500，GCN的hidden_dim改为9，18
+- 网络输出的action<0被认为不调度，>0按照比例分配所有的资源块
+- 确定资源块后由误码率公式得到保证误码率下分配的该资源块最多能发几个数据包（*不会超过队列上限*，**但是这么做相当于在业务繁忙时完全保证误码率而不考虑时延**）
+- state由snr，队头hol和队列包数量组成，packets的归一化除以了该次state中最大的packets数量
+- 每有一个数据包被提前发送或是被丢弃，获得reward=-1，没有其余情况
+- 进行性能评估时使用每个ue中的discard变量和packets变量，分别统计了总丢包数和总数据包数，在env重置时归0（*只进行了计数，并未应用*）
+---
+## 结果：
+- 无法收敛，entropy随着训练增大
+- 1e6的step数量需要训练15小时
+---
+## 预期改动方向：
+1. 改回正向奖励，因为负奖励有可能将loss打乱了：**version1.1**
+2. 对这个分类问题考虑使用softmax进行mean的输出
+3. 也可能是泊松分布的参数太大了（*目前为0.4*）
+---
+## 仍存在的问题：
+- 需要一个判断性能结果的指标
+- 是否要对输出的action做范围限制（clip）？
+- 需要平衡时延和误码率（*一个可能的想法是设置三档误码率1e-5，1e-4，1e-3，然后让网络根据数据流量（etc.**一段时间内的丢包数量**）判断出当前负载强度然后选择一种挡位*）
