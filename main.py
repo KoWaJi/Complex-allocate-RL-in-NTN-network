@@ -75,7 +75,7 @@ def main(args, env_name, config, number):
     #torch.manual_seed(seed)
 
     #args.max_action = 2
-    args.max_episode_steps = 2000  # Maximum number of steps per episode
+    args.max_episode_steps = 500  # Maximum number of steps per episode
     print("env={}".format(env_name))
     #print("max_action={}".format(args.max_action))
     print("max_episode_steps={}".format(args.max_episode_steps))

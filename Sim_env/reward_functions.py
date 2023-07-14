@@ -9,8 +9,8 @@ def hol_is_in_range(hol, d_min, d_max) -> bool:
 
 
 def hol_flat_reward(hol, d_min, d_max) -> float:
-    if not hol_is_in_range(hol, d_min, d_max):
-        return -1.
+    if hol_is_in_range(hol, d_min, d_max):
+        return 5.
     else:
         return 0.
 

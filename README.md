@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # PPO-continuous
 This is a concise Pytorch implementation of PPO on continuous action space with 10 tricks.<br />
 
@@ -27,3 +28,7 @@ env_index=3 represent 'Walker2d-v2'<br />
 
 ## Tutorial
 If you can read Chinese, you can get more information from this blog.https://zhuanlan.zhihu.com/p/512327050
+=======
+## version1.1：
+- 改回正向奖励的测试
+>>>>>>> Stashed changes

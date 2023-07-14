@@ -48,7 +48,7 @@ class Rlc:
         self.time_step += 1
         discard_by_outtime = self.discard()
         self.n_discard += discard_by_outtime #超时被丢弃的包数量
-        ret -= discard_by_outtime
+        #ret -= discard_by_outtime
         return ret
 
     def get_hol_reward(self):  #在抖动时间内就返回1
@@ -58,9 +58,7 @@ class Rlc:
             else:
                 return 0.
         else:
-            return self.config.hol_reward_f(self.get_hol(), self.config.d_min, self.config.d_max)  #对于rlc，在时延内
-                                                                                   #调度或者不进行调度return为0，时延前调度或者
-                                                                                    #包超时丢弃return为-1
+            return self.config.hol_reward_f(self.get_hol(), self.config.d_min, self.config.d_max)
 
     def pop(self):  #pop的输入是资源块数量
         if self.queue:
