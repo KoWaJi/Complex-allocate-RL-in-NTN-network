@@ -172,6 +172,7 @@ class Agent(nn.Module):
             self.fc5,
             nn.LeakyReLU(),
             self.fc6,
+            nn.Softmax(),
         )
 
         self.log_std = nn.Parameter(torch.zeros(1), requires_grad=True)

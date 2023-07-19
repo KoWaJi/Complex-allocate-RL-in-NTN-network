@@ -17,7 +17,7 @@ class env_config_helper():
         self.D_MIN = 5
         self.D_MAX = 6
 
-        self.TOTAL_N_RB = 50
+        self.TOTAL_N_RB = 100
 
         self.T_f = 1.25e-4   
         self.rb_bw = 180e3   

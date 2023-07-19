@@ -128,7 +128,7 @@ class LearningLogger():
         assert isinstance(experiment_name, str)
 
         #self.__path_folder = os.path.join(path, log_folder_name, experiment_name + "-" + get_current_time_str())
-        self.__path_folder = os.path.join(path, log_folder_name, 'test1.1')
+        self.__path_folder = os.path.join(path, log_folder_name, 'test1.2')
         self.__exp_name = experiment_name
         self.__tb_logger = MySummaryWriter(log_dir=self.__path_folder, filename_suffix="." + experiment_name)
         self.__tb_logger_is_set = True

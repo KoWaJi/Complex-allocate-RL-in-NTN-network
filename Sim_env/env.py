@@ -101,12 +101,19 @@ class ENV(Thread):
         packets = []
         print('action', action)
         sumaction = sum(action)
-        for u in range(len(self.true_ue)):
-            action[u] = round(action[u] / sumaction * self.config.ue_config.channel.total_n_rb)  #这里是根据输出的action值等比例
+        if sumaction == 0:
+            for u in range(len(self.true_ue)):
+                action[u] = 0
+                r, packet = self.true_ue[u].step(UE_RB_ACTION(action[u]))
+                packets.append(packet)
+                rewards.append(r)
+        else:
+            for u in range(len(self.true_ue)):
+                action[u] = round(action[u] / sumaction * self.config.ue_config.channel.total_n_rb)  #这里是根据输出的action值等比例
                                                                        #分配50个资源块数量。取不取round还待定
-            r, packet = self.true_ue[u].step(UE_RB_ACTION(action[u]))
-            packets.append(packet)
-            rewards.append(r)
+                r, packet = self.true_ue[u].step(UE_RB_ACTION(action[u]))
+                packets.append(packet)
+                rewards.append(r)
         for u in range(len(self.connect_ue)):
             self.connect_ue[u].rlc.push()
         print('资源块数量', action)
